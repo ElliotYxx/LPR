@@ -509,7 +509,7 @@ class PlateRecognition():
 # 测试
 if __name__ == '__main__':
     c = PlateRecognition()
-    result = c.VLPR('./Test/8.jpg')
+    result = c.VLPR('./Test/5.jpg')
     print(result)
 
 

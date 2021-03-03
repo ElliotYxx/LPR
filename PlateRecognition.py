@@ -99,21 +99,21 @@ class PlateRecognition:
             img = cv2.GaussianBlur(img, (blur, blur), 0)
         oldimg = img
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        cv2.imshow('GaussianBlur', img)
+        # cv2.imshow('GaussianBlur', img)
         kernel = np.ones((20, 20), np.uint8)
         img_opening = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)  # 开运算
         img_opening = cv2.addWeighted(img, 1, img_opening, -1, 0)  # 与上一次开运算结果融合
-        cv2.imshow('img_opening', img_opening)
+        # cv2.imshow('img_opening', img_opening)
 
         # 找到图像边缘
         ret, img_thresh = cv2.threshold(img_opening, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)  # 二值化
         img_edge = cv2.Canny(img_thresh, 100, 200)
-        cv2.imshow('img_edge', img_edge)
+        # cv2.imshow('img_edge', img_edge)
         # 使用开运算和闭运算让图像边缘成为一个整体
         kernel = np.ones((self.config["morphologyr"], self.config["morphologyc"]), np.uint8)
         img_edge1 = cv2.morphologyEx(img_edge, cv2.MORPH_CLOSE, kernel)  # 闭运算
         img_edge2 = cv2.morphologyEx(img_edge1, cv2.MORPH_OPEN, kernel)  # 开运算
-        cv2.imshow('img_edge2', img_edge2)
+        # cv2.imshow('img_edge2', img_edge2)
         # 查找图像边缘整体形成的矩形区域，可能有很多，车牌就在其中一个矩形区域中
         try:
             # 由于不同版本的opencv返回值数量不同，因此用try catch进行处理
@@ -189,7 +189,8 @@ class PlateRecognition:
                 point_limit(new_left_point)
                 card_img = dst[int(right_point[1]):int(height_point[1]), int(new_left_point[0]):int(right_point[0])]
                 card_imgs.append(card_img)
-        cv2.imshow('angel card_img', card_imgs[0])
+        # cv2.imshow('angel card_img', card_imgs[0])
+
         #____开始使用颜色定位，排除不是车牌的矩形，目前只识别蓝、绿、黄车牌
         colors = []
         for card_index, card_img in enumerate(card_imgs):
@@ -274,7 +275,6 @@ class PlateRecognition:
                 if color != "green" or yl < (yh - yl) // 4 else card_img[yl - (yh - yl) // 4:yh, xl:xr]
         cv2.imshow("result", card_imgs[0])
         cv2.waitKey(0)
-        # cv2.imwrite('1.jpg', card_imgs[0])
         print('颜色识别结果：' + colors[0])
         return card_imgs, colors
 
@@ -299,7 +299,7 @@ class PlateRecognition:
         return wave_peaks
 
     # 根据找出的波峰，分隔图片，从而得到逐个字符图片
-    def __seperate_card(self, img, waves):
+    def __seperate_card(img, waves):
         part_cards = []
         for wave in waves:
             part_cards.append(img[:, wave[0]:wave[1]])
@@ -318,19 +318,16 @@ class PlateRecognition:
                 # 做一次锐化处理
                 kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]], np.float32)  # 锐化
                 card_img = cv2.filter2D(card_img, -1, kernel=kernel)
-                cv2.imshow("custom_blur", card_img)
-                cv2.waitKey(0)
+                # cv2.imshow("custom_blur", card_img)
                 # RGB转GARY
                 gray_img = cv2.cvtColor(card_img, cv2.COLOR_BGR2GRAY)
-                cv2.imshow('gray_img', gray_img)
-                cv2.waitKey(0)
+                # cv2.imshow('gray_img', gray_img)
                 # 黄、绿车牌字符比背景暗、与蓝车牌刚好相反，所以黄、绿车牌需要反向
                 if color == "green" or color == "yellow":
                     gray_img = cv2.bitwise_not(gray_img)
                 # 二值化
                 ret, gray_img = cv2.threshold(gray_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-                cv2.imshow('gray_img', gray_img)
-                cv2.waitKey(0)
+                # cv2.imshow('gray_img', gray_img)
                 # 查找水平直方图波峰
                 x_histogram = np.sum(gray_img, axis=1)
                 # 最小值
@@ -345,15 +342,13 @@ class PlateRecognition:
                 # 认为水平方向，最大的波峰为车牌区域
                 wave = max(wave_peaks, key=lambda x: x[1] - x[0])
                 gray_img = gray_img[wave[0]:wave[1]]
-                cv2.imshow('gray_img', gray_img)
-                cv2.waitKey(0)
+                # cv2.imshow('gray_img', gray_img)
 
                 # 查找垂直直方图波峰
                 row_num, col_num = gray_img.shape[:2]
                 # 去掉车牌上下边缘1个像素，避免白边影响阈值判断
                 gray_img = gray_img[1:row_num - 1]
-                cv2.imshow('gray_img', gray_img)
-                cv2.waitKey(0)
+                # cv2.imshow('gray_img', gray_img)
                 y_histogram = np.sum(gray_img, axis=0)
                 y_min = np.min(y_histogram)
                 y_average = np.sum(y_histogram) / y_histogram.shape[0]
@@ -415,12 +410,10 @@ class PlateRecognition:
 
                     # 边缘填充
                     part_card = cv2.copyMakeBorder(part_card, 0, 0, w, w, cv2.BORDER_CONSTANT, value=[0, 0, 0])
-                    cv2.imshow('part_card', part_card)
-                    cv2.waitKey(0)
+                    # cv2.imshow('part_card', part_card)
                     # 图片缩放（缩小）
                     part_card = cv2.resize(part_card, (self.SZ, self.SZ), interpolation=cv2.INTER_AREA)
-                    cv2.imshow('part_card', part_card)
-                    cv2.waitKey(0)
+                    # cv2.imshow('part_card', part_card)
                     part_card = SVM_Train.preprocess_hog([part_card])
 
                     if i == 0:  # 识别汉字
@@ -483,5 +476,5 @@ class PlateRecognition:
 
 if __name__ == '__main__':
     c = PlateRecognition()
-    result = c.__start_recognize__("./Test/5.jpg")
+    result = c.__start_recognize__("./Test/0.jpg")
     print(result)
